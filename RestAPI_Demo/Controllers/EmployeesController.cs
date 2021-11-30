@@ -1,46 +1,122 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Dapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Npgsql;
+using RestAPI_Demo.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
 
 namespace RestAPI_Demo.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiController]
     public class EmployeesController : Controller
     {
-        // GET: api/values
+        private EmployeeData _employeeData;
+        private readonly NpgsqlConnection _connection;
+
+        public EmployeesController(EmployeeData employeeData, IConfiguration configuration)
+        {
+            _employeeData = employeeData;
+
+            string connectionString = configuration.GetConnectionString("default");
+
+            _connection = new NpgsqlConnection(connectionString);
+
+        }
+
+        // GET: all employees
         [HttpGet]
-        public IEnumerable<string> Get()
+        [Route("api/[controller]/getEmployees")]
+        public async Task<IActionResult> GetEmployees()
         {
-            return new string[] { "value1", "value2" };
+            string query = @"select employeeid as id,name,createdDate from employee";
+
+            var result = await _connection.QueryAsync<EmployeeModel>(query);
+
+            return Ok(new { count = result.Count(), payload = result });
+
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET: single employee
+        [HttpGet]
+        [Route("api/[controller]/{id:int}")]
+        public async Task<IActionResult> GetEmployeeById(int id)
         {
-            return "value";
+            string query = @"select employeeid as id,name,createdDate from employee where employeeid = @id";
+
+            var result = await _connection.QueryFirstOrDefaultAsync<EmployeeModel>(query, new
+            {
+                id = id
+            });
+            if (result == null)
+            {
+                return NotFound($"Employee with {id} not found");
+            }
+
+            return Ok(new { count = 1, payload = result });
+
+
+        }
+        // GET: single employee by name
+        [HttpGet]
+        [Route("api/[controller]/{name}")]
+        public async Task<IActionResult> GetEmployeeByName(string name)
+        {
+            string query = @"select employeeid as id,name,createdDate from employee where name ilike @name";
+
+            var result = await _connection.QueryAsync<EmployeeModel>(query, new
+            {
+                name = "%"+name+"%"
+            });;
+            if (!result.Any())
+            {
+                return NotFound($" No employee with {name} was found");
+            }
+
+            return Ok(new { count = result.Count(), payload = result });
         }
 
-        // POST api/values
+        // POST: create an employee
         [HttpPost]
-        public void Post([FromBody] string value)
+        [Route("api/[controller]/createEmployee")]
+        public async Task<IActionResult> CreateEmployee(EmployeeModel employee)
         {
+            //_employeeData.createEmployee(employee);
+            string query = @"insert into employee(Name, CreatedDate) values (@Name, @CreatedDate); ";
+            var result = await _connection.ExecuteAsync(query, new
+            {
+                ID = Guid.NewGuid(),
+                Name = employee.Name,
+                CreatedDate = DateTime.Now
+            }).ConfigureAwait(false);
+            Console.WriteLine(result);
+            if (result > 0)
+            {
+                return Ok("Employee added succesfully!");
+                //  return Created(HttpContext.Request.Scheme + "://" + HttpContext.Request.Host + HttpContext.Request.Path + "/" + employee.Id, employee);
+            }
+
+            return BadRequest("Something went wrong");
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // DELETE: single employee
+        [HttpDelete]
+        [Route("api/[controller]/deleteEmployee/{id}")]
+        public async Task<IActionResult> DeleteEmployee(int id)
         {
+            return NotFound();
         }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        // EDIT: single employee
+        [HttpPut]
+        [Route("api/[controller]/editEmployee/{id}")]
+        public IActionResult edit_Employee(int id, EmployeeModel employee)
         {
+
+            return Ok(employee);
+
         }
     }
 }
