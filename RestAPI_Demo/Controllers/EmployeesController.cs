@@ -107,7 +107,17 @@ namespace RestAPI_Demo.Controllers
         [Route("api/[controller]/deleteEmployee/{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
-            return NotFound();
+            string query = @"delete from employee where employeeid = @id";
+            var result = await _connection.QueryAsync<EmployeeModel>(query, new
+            {
+                id = id
+            }) ;
+            if (result == null)
+            {
+                return NotFound($"Employee with ID:{id} cannot be found.");
+            }
+
+            return Ok($"Employee with Id:{id} deleted successfully.");
         }
         // EDIT: single employee
         [HttpPut]
