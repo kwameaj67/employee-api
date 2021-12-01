@@ -69,8 +69,8 @@ namespace RestAPI_Demo.Controllers
 
             var result = await _connection.QueryAsync<EmployeeModel>(query, new
             {
-                name = "%"+name+"%"
-            });;
+                name = "%" + name + "%"
+            }); ;
             if (!result.Any())
             {
                 return NotFound($" No employee with {name} was found");
@@ -108,15 +108,11 @@ namespace RestAPI_Demo.Controllers
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             string query = @"delete from employee where employeeid = @id";
-            var result = await _connection.QueryAsync<EmployeeModel>(query, new
+            var result = await _connection.ExecuteAsync(query, new
             {
-                id = id
-            }) ;
-            if (result == null)
-            {
-                return NotFound($"Employee with ID:{id} cannot be found.");
-            }
-
+                id
+            });
+            Console.WriteLine(result);
             return Ok($"Employee with Id:{id} deleted successfully.");
         }
         // EDIT: single employee
