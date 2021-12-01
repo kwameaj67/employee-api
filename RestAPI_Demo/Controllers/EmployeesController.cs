@@ -45,7 +45,7 @@ namespace RestAPI_Demo.Controllers
         [Route("api/[controller]/{id:int}")]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
-            string query = @"select employeeid as id,name,createdDate from employee where employeeid = @id";
+            string query = @"select employeeid as id,name,createdDate from employee where employeeid = @Id";
 
             var result = await _connection.QueryFirstOrDefaultAsync<EmployeeModel>(query, new
             {
@@ -85,12 +85,12 @@ namespace RestAPI_Demo.Controllers
         public async Task<IActionResult> CreateEmployee(EmployeeModel employee)
         {
             //_employeeData.createEmployee(employee);
-            string query = @"insert into employee(Name, CreatedDate) values (@Name, @CreatedDate); ";
+            string query = @"insert into employee(name, createdDate) values (@Name, @CreatedDate); ";
             var result = await _connection.ExecuteAsync(query, new
             {
                 ID = Guid.NewGuid(),
                 Name = employee.Name,
-                CreatedDate = DateTime.Now
+                CreatedDate = employee.CreatedDate
             }).ConfigureAwait(false);
             Console.WriteLine(result);
             if (result > 0)
@@ -113,15 +113,27 @@ namespace RestAPI_Demo.Controllers
                 id
             });
             Console.WriteLine(result);
+            if(result == 0)
+            {
+                return NotFound($"Employee Id: {id} not found.");
+            }
             return Ok($"Employee with Id:{id} deleted successfully.");
         }
-        // EDIT: single employee
+        // EDIT: update a single employee
         [HttpPut]
         [Route("api/[controller]/editEmployee/{id}")]
-        public IActionResult edit_Employee(int id, EmployeeModel employee)
+        public async Task<IActionResult> EditEmployee(int id, EmployeeModel employee)
         {
-
-            return Ok(employee);
+            string query = @"update employee set 
+                           name = @Name,
+                           createdDate = @CreatedDate 
+                           where employeeid = @id;";
+            var result = await _connection.ExecuteAsync(query, new {
+                id = employee.Id,
+                name = employee.Name,
+                createdDate = employee.CreatedDate
+            });
+            return Ok(new { payload = result });
 
         }
     }
