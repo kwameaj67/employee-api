@@ -32,7 +32,7 @@ namespace RestAPI_Demo.Controllers
         [Route("api/[controller]/getEmployees")]
         public async Task<IActionResult> GetEmployees()
         {
-            string query = @"select employeeid as id,name,createdDate from employee";
+            string query = @"select employeeid as id,name,createdDate from employee order by employeeid ASC";
 
             var result = await _connection.QueryAsync<EmployeeModel>(query);
 
@@ -119,7 +119,8 @@ namespace RestAPI_Demo.Controllers
             }
             return Ok($"Employee with Id:{id} deleted successfully.");
         }
-        // EDIT: update a single employee
+
+        // UPDATE: update a single employee
         [HttpPut]
         [Route("api/[controller]/editEmployee/{id}")]
         public async Task<IActionResult> EditEmployee(int id, EmployeeModel employee)
@@ -129,11 +130,16 @@ namespace RestAPI_Demo.Controllers
                            createdDate = @CreatedDate 
                            where employeeid = @id;";
             var result = await _connection.ExecuteAsync(query, new {
-                id = employee.Id,
-                name = employee.Name,
-                createdDate = employee.CreatedDate
+                id = id,
+                Name = employee.Name,
+                CreatedDate = employee.CreatedDate
             });
-            return Ok(new { payload = result });
+            if (result == 0)
+            {
+                return NotFound($"Employee Id:{id} not found");
+            }
+            //return Ok(new { payload = result });
+            return Ok("Employee succesfully updated");
 
         }
     }
