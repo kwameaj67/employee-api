@@ -40,7 +40,7 @@ namespace RestAPI_Demo
              .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
             services.AddControllers();
 
-            services.AddSingleton<EmployeeData, MockEmployeeData>();
+            services.AddSingleton<IEmployeeService, EmployeeService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
