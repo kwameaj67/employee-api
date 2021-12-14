@@ -5,6 +5,8 @@ namespace RestAPI_Demo.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public DateTime  CreatedDate { get; set; }
+        public DateTimeOffset  CreatedDate { get; set; }
+
+       
     }
 }
