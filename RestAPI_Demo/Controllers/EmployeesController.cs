@@ -32,7 +32,8 @@ namespace RestAPI_Demo.Controllers
         [Route("api/[controller]/getEmployees")]
         public async Task<IActionResult> GetEmployees()
         {
-            return Ok(new {  payload =await _employeeService.getEmployees()});
+            var result = await _employeeService.getEmployees();
+            return Ok(new { count = result.Count(), payload = result });
 
         }
 
@@ -48,12 +49,10 @@ namespace RestAPI_Demo.Controllers
                 return NotFound($"Employee with {id} not found");
             }
             return Ok(new { count = 1, payload = result });
-
-
         }
         // GET: single employee by name
         [HttpGet]
-        [Route("api/[controller]/{name}")]
+        [Route("api/[controller]/searchByName/{name}")]
         public async Task<IActionResult> GetEmployeeByName(string name)
         {
             var result = await _employeeService.getEmployeeByName(name);
