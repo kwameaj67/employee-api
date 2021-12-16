@@ -6,7 +6,7 @@ namespace RestAPI_Demo.Models
 {
      public interface IEmployeeService
     {
-        Task<List<EmployeeModel>> getEmployees();
+        Task<IEnumerable<EmployeeModel>> getEmployees();
         Task<EmployeeModel> getEmployeeByName(string name);
         Task<EmployeeModel> getEmployee(int id);
         Task<EmployeeModel> createEmployee(EmployeeModel employee);
