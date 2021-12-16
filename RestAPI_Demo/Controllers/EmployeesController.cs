@@ -60,7 +60,7 @@ namespace RestAPI_Demo.Controllers
         }
         // GET: single employee by name
         [HttpGet]
-        [Route("searchByName/{name}")]
+        [Route("searchByName/{name:alpha}")]
         public async Task<IActionResult> GetEmployeeByName(string name)
         {
             var result = await _employeeService.getEmployeeByName(name);
@@ -68,7 +68,7 @@ namespace RestAPI_Demo.Controllers
             {
                 return NotFound($"No Employee with {name} was found");
             }
-            return Ok(new {  payload = result });
+            return Ok(new { payload = result });
         }
 
         // POST: create an employee
@@ -99,11 +99,12 @@ namespace RestAPI_Demo.Controllers
         public async Task<IActionResult> EditEmployee(int id, EmployeeModel employee)
         {
             var result = await _employeeService.editEmployee(id, employee);
-            if (result != null)
+            if (result == null)
             {
-                return Ok("Employee succesfully updated");
+                return NotFound($"Employee Id:{id} not found");
+               
             }
-            return NotFound($"Employee Id:{id} not found");
+            return Ok("Employee succesfully updated");
             //return Ok(new { payload = result });
 
         }

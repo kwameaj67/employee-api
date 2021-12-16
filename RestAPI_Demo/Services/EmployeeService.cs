@@ -36,7 +36,7 @@ namespace RestAPI_Demo.Services
         {
             string query = @"select employeeid as id,name,createdDate from employee order by employeeid ASC";
             var result = await _connection.QueryAsync<EmployeeModel>(query);
-            return (List<EmployeeModel>)result;
+            return (IEnumerable<EmployeeModel>)result;
         }
         public async Task<EmployeeModel> getEmployee(int id)
         {
@@ -79,11 +79,11 @@ namespace RestAPI_Demo.Services
         {
             string query = @"select employeeid as id,name,createdDate from employee where name ilike @name";
 
-            var result = await _connection.QueryAsync<EmployeeModel>(query, new
+           var result =   await _connection.QueryFirstOrDefaultAsync(query, new
             {
                 name = "%" + name + "%"
-            });
-            return (EmployeeModel)result;
+            }).ConfigureAwait(false);
+            return result;
         }
     }
 }
