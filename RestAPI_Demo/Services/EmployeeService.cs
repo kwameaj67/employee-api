@@ -29,10 +29,10 @@ namespace RestAPI_Demo.Services
                 Name = employee.Name,
                 CreatedDate = employee.CreatedDate
             }).ConfigureAwait(false);
-                return employee;
+            return employee;
            
         }
-        public async Task<List<EmployeeModel>> getEmployees()
+        public async Task<IEnumerable<EmployeeModel>> getEmployees()
         {
             string query = @"select employeeid as id,name,createdDate from employee order by employeeid ASC";
             var result = await _connection.QueryAsync<EmployeeModel>(query);
@@ -42,33 +42,20 @@ namespace RestAPI_Demo.Services
         {
             string query = @"select employeeid as id,name,createdDate from employee where employeeid = @Id";
 
-            var result = await _connection.QueryFirstOrDefaultAsync<EmployeeModel>(query, new
+            return await _connection.QueryFirstOrDefaultAsync<EmployeeModel>(query, new
             {
                 Id = id
             });
-            return result;
         }
-
-        public async  Task<EmployeeModel> getEmployeeByName(string name)
-        {
-            string query = @"select employeeid as id,name,createdDate from employee where name ilike @name";
-
-            var result = await _connection.QueryAsync<EmployeeModel>(query, new
-            {
-                name = "%" + name + "%"
-            }); 
-            return (EmployeeModel)result;
-        }
-
 
         public async Task<EmployeeModel> deleteEmployee(int id)
         {
             string query = @"delete from employee where employeeid = @id";
-            var result = await _connection.QueryFirstOrDefaultAsync(query, new
+
+            return await _connection.QueryFirstOrDefaultAsync(query, new
             {
                 id
-            });
-            return result;
+            }).ConfigureAwait(false);
         }
 
         public async Task<EmployeeModel> editEmployee(int id, EmployeeModel employee)
@@ -77,66 +64,26 @@ namespace RestAPI_Demo.Services
                            name = @Name,
                            createdDate = @CreatedDate 
                            where employeeid = @id;";
-            await _connection.ExecuteAsync(query, new
+             _ = await _connection.ExecuteAsync(query, new
             {
-                id = id,
+                id,
                 Name = employee.Name,
                 CreatedDate = employee.CreatedDate
+            }).ConfigureAwait(false);
+
+            return employee;
+             
+        }
+
+        public async Task<EmployeeModel> getEmployeeByName(string name)
+        {
+            string query = @"select employeeid as id,name,createdDate from employee where name ilike @name";
+
+            var result = await _connection.QueryAsync<EmployeeModel>(query, new
+            {
+                name = "%" + name + "%"
             });
-            return employee;
+            return (EmployeeModel)result;
         }
-
-       
-
-        /*
-        private List<EmployeeModel> employees = new List<EmployeeModel>()
-        {
-            new EmployeeModel(){Id =1,Name = "Kwame Boateng",CreatedDate = DateTime.Now},
-            new EmployeeModel(){Id = 2,Name = "Owusu Estella",CreatedDate = DateTime.Now},
-            new EmployeeModel(){Id = 3,Name = "Ellen Asante",CreatedDate = DateTime.Now},
-            new EmployeeModel(){Id = 4,Name = "Efua Ntiriwaa",CreatedDate = DateTime.Now},
-
-        };
-       
-       
-        public EmployeeModel getEmployee(int id)
-        {
-            return employees.SingleOrDefault(user => user.Id == id);
-        }
-
-        public List<EmployeeModel> getEmployees()
-        {
-            return employees;
-        }
-
-        public EmployeeModel createEmployee(EmployeeModel employee)
-        {
-            employee.Id = 1;
-            employee.CreatedDate = DateTime.Now;
-            employees.Add(employee);
-            return employee;
-
-        }
-
-        public void deleteEmployee(EmployeeModel employee)
-        {
-            employees.Remove(employee);
-        }
-
-        public EmployeeModel editEmployee(EmployeeModel employee)
-        {
-            var existingEmployee = getEmployee(employee.Id);
-            existingEmployee.Name = employee.Name;
-            existingEmployee.CreatedDate = DateTime.Now;
-            return employee;
-        }
-
-        Task<EmployeeModel[]> EmployeeData.getEmployees()
-        {
-            throw new NotImplementedException();
-        }
-        */
-
-
     }
 }
