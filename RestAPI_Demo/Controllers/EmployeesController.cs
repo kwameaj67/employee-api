@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 namespace RestAPI_Demo.Controllers
 {
     [ApiController]
+    [Route("api/[controller]")]
     public class EmployeesController : Controller
     {
         private IEmployeeService _employeeService;
@@ -29,17 +30,24 @@ namespace RestAPI_Demo.Controllers
 
         // GET: all employees
         [HttpGet]
-        [Route("api/[controller]/getEmployees")]
+        [Route("getEmployees")]
         public async Task<IActionResult> GetEmployees()
         {
-            var result = await _employeeService.getEmployees();
-            return Ok(new { count = result.Count(), payload = result });
+            try
+            {
+                var result = await _employeeService.getEmployees();
+                return Ok(new { count = result.Count(), payload = result });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error has occured");
+            }
 
         }
 
         // GET: single employee
         [HttpGet]
-        [Route("api/[controller]/{id:int}")]
+        [Route("{id:int}")]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
             var result = await _employeeService.getEmployee(id);
@@ -52,7 +60,7 @@ namespace RestAPI_Demo.Controllers
         }
         // GET: single employee by name
         [HttpGet]
-        [Route("api/[controller]/searchByName/{name}")]
+        [Route("searchByName/{name}")]
         public async Task<IActionResult> GetEmployeeByName(string name)
         {
             var result = await _employeeService.getEmployeeByName(name);
@@ -65,7 +73,7 @@ namespace RestAPI_Demo.Controllers
 
         // POST: create an employee
         [HttpPost]
-        [Route("api/[controller]/createEmployee")]
+        [Route("createEmployee")]
         public async Task<IActionResult> CreateEmployee(EmployeeModel employee)
         {
              await _employeeService.createEmployee(employee);
@@ -76,7 +84,7 @@ namespace RestAPI_Demo.Controllers
 
         // DELETE: single employee
         [HttpDelete]
-        [Route("api/[controller]/deleteEmployee/{id}")]
+        [Route("deleteEmployee/{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
            
@@ -87,7 +95,7 @@ namespace RestAPI_Demo.Controllers
 
         // UPDATE: update a single employee
         [HttpPut]
-        [Route("api/[controller]/editEmployee/{id}")]
+        [Route("editEmployee/{id}")]
         public async Task<IActionResult> EditEmployee(int id, EmployeeModel employee)
         {
             var result = await _employeeService.editEmployee(id, employee);
